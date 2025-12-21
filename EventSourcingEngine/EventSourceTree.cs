@@ -79,9 +79,13 @@ public abstract class EventSourceTree<TState, TEvent>
             {
                 PopProcessedEvent();
             }
+            else // if InitEvents.Count == 1, then it has to go and search for next executors 
+            {
+                return TryResumeInNextExecutors(eventNodeInst);
+            }
                 
             // It might be possible that same node should handle next event
-            if (_cursor.InitEvents.Count > 1 && ShouldHandleStateUpdate(eventNodeInst))
+            if (ShouldHandleStateUpdate(eventNodeInst))
             {
                 return ResumeTree(eventNodeInst);
             }
