@@ -29,7 +29,19 @@ public sealed class FirstEventSourceTree(IServiceProvider serviceProvider) : Eve
                         "ResultSaveError",
                     ],
                     []
-                    )
+                    ),
+                
+                new EventNode<TestState, Event>(
+                    [
+                        "ResultFetched",
+                        "Dupa"
+                    ],
+                    typeof(ResultSaverNode), 
+                    [
+                        "ResultSaved",
+                    ],
+                    []
+                )
             ]
             );
     }

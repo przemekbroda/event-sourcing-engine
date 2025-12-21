@@ -135,7 +135,7 @@ public abstract class EventSourceTree<TState, TEvent>
 
         if (eventNodeInst is null)
         {
-            throw new EventSourceEngineResumeException("Cannot resume event sourcing tree");
+            throw new EventSourcingEngineResumeException("Cannot resume event sourcing tree");
         }
         
         await TryExecuteNode(eventNodeInst, cancellationToken);
@@ -212,7 +212,7 @@ public abstract class EventSourceTree<TState, TEvent>
         {
             if (!eventNames.Add(producesEventName))
             {
-                throw new Exception("asda");
+                throw new EventSourcingTreeValidationException("Duplicate handled events in the same next executors");
             }
         }
     }
