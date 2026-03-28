@@ -7,7 +7,7 @@ namespace EventSourcingEngine.UnitTests.SimpleTreeTests;
 
 public class SimpleTreeTests
 {
-    private readonly IWorkflowTree<SimpleTreeState, SimpleTreeEvent, SimpleTreeProvider> _tree;
+    private readonly IWorkflowTreeExecutor<SimpleTreeState, SimpleTreeEvent, SimpleTreeProvider> _treeExecutor;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly Mock<FirstEventExecutorNode> _firstEventExecutorNodeMock = new();
     private readonly Mock<ResultSaverNode> _resultSaverNodeMock = new();
@@ -15,7 +15,7 @@ public class SimpleTreeTests
     public SimpleTreeTests()
     {
         ConfigureNodesMocks();
-        _tree = BuildServiceProvider().GetRequiredService<IWorkflowTree<SimpleTreeState, SimpleTreeEvent, SimpleTreeProvider>>();
+        _treeExecutor = BuildServiceProvider().GetRequiredService<IWorkflowTreeExecutor<SimpleTreeState, SimpleTreeEvent, SimpleTreeProvider>>();
     }
     
     public static IEnumerable<object[]> AwaitingResultsWithAttempts()
@@ -43,7 +43,7 @@ public class SimpleTreeTests
 
         
         // Act
-        var result = await _tree.ExecuteTree(events, _cancellationTokenSource.Token);
+        var result = await _treeExecutor.ExecuteTree(events, _cancellationTokenSource.Token);
         
         // Assert
         var producedEvent = result.ProducedEvent;
@@ -72,7 +72,7 @@ public class SimpleTreeTests
         ];
 
         // Act
-        var result = await _tree.ExecuteTree(events, _cancellationTokenSource.Token);
+        var result = await _treeExecutor.ExecuteTree(events, _cancellationTokenSource.Token);
         
         // Assert
         var producedEvent = result.ProducedEvent;
@@ -106,7 +106,7 @@ public class SimpleTreeTests
         events.Reverse();
 
         // Act
-        var result = await _tree.ExecuteTree(events, _cancellationTokenSource.Token);
+        var result = await _treeExecutor.ExecuteTree(events, _cancellationTokenSource.Token);
         
         // Assert
         var producedEvent = result.ProducedEvent;
@@ -140,7 +140,7 @@ public class SimpleTreeTests
         events.Reverse();
 
         // Act
-        var result = await _tree.ExecuteTree(events, _cancellationTokenSource.Token);
+        var result = await _treeExecutor.ExecuteTree(events, _cancellationTokenSource.Token);
         
         // Assert
         var producedEvent = result.ProducedEvent;
@@ -168,7 +168,7 @@ public class SimpleTreeTests
             new SimpleTreeEvent.AwaitingResult(),
         ];
         
-        var exception = await Assert.ThrowsAsync<WorkflowEngineResumeException>(() => _tree.ExecuteTree(events, CancellationToken.None));
+        var exception = await Assert.ThrowsAsync<WorkflowEngineResumeException>(() => _treeExecutor.ExecuteTree(events, CancellationToken.None));
         
         Assert.Equal($"To initialize workflow tree's state, first event must be of type {nameof(SimpleTreeEvent.AwaitingExecution)}", exception.Message);
     }

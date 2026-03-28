@@ -75,7 +75,7 @@ app.MapGet("/process/{id:guid}", async (AppDbContext dbContext, Guid id) =>
 app.MapPatch("/process/{id:guid}", async (
     Guid id, 
     AppDbContext dbContext, 
-    IWorkflowTree<TestState, FirstTreeEvent, FirstTreeProvider> workflow, 
+    IWorkflowTreeExecutor<TestState, FirstTreeEvent, FirstTreeProvider> workflow, 
     CancellationToken cancellationToken) =>
 {
     using (var transaction = dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted))

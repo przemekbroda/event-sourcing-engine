@@ -1,6 +1,6 @@
 namespace EventSourcingEngine;
 
-public interface IWorkflowTree<TState, TEvent, TTreeProvider>
+public interface IWorkflowTreeExecutor<TState, TEvent, TTreeProvider>
     where TState : class
     where TEvent : class
     where TTreeProvider : TreeProvider<TState, TEvent>
@@ -12,7 +12,7 @@ public interface IWorkflowTree<TState, TEvent, TTreeProvider>
     /// </summary>
     /// <param name="events"></param>
     /// <param name="cancellationToken"></param>
-    public Task<ExecuteTreeResult<TState, TEvent>> ExecuteTree(IList<TEvent> events, CancellationToken cancellationToken);
+    public Task<WorkflowTreeExecutionResult<TState, TEvent>> ExecuteTree(IList<TEvent> events, CancellationToken cancellationToken);
 
     /// <summary>
     /// Used solely to recreate state based on provided events and state initializer

@@ -4,22 +4,22 @@ using Microsoft.Extensions.Logging;
 
 namespace EventSourcingEngine;
 
-internal class WorkflowTree<TState, TEvent, TTreeProvider> : IWorkflowTree<TState, TEvent, TTreeProvider>
+internal class WorkflowTreeExecutor<TState, TEvent, TTreeProvider> : IWorkflowTreeExecutor<TState, TEvent, TTreeProvider>
     where TState : class
     where TEvent : class
     where TTreeProvider : TreeProvider<TState, TEvent>
 {
     private readonly EventNode<TState, TEvent> _eventNode;
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<WorkflowTree<TState, TEvent, TTreeProvider>> _logger;
+    private readonly ILogger<WorkflowTreeExecutor<TState, TEvent, TTreeProvider>> _logger;
     private readonly TreeProvider<TState, TEvent> _treeProvider;
     
     private EventNodeInst<TState, TEvent> _eventNodeInst = null!;
 
-    public WorkflowTree(
+    public WorkflowTreeExecutor(
         IServiceProvider serviceProvider, 
         TTreeProvider treeProvider,
-        ILogger<WorkflowTree<TState, TEvent, TTreeProvider>> logger)
+        ILogger<WorkflowTreeExecutor<TState, TEvent, TTreeProvider>> logger)
     {
         _serviceProvider = serviceProvider;
         _treeProvider = treeProvider;
@@ -40,7 +40,7 @@ internal class WorkflowTree<TState, TEvent, TTreeProvider> : IWorkflowTree<TStat
     ///     It is being executed only once just after the ExecuteTree method call. If the first event's payload is null,
     ///     then a passed object to the function will also be null
     /// </param>
-    public async Task<ExecuteTreeResult<TState, TEvent>> ExecuteTree(IList<TEvent> events, CancellationToken cancellationToken)
+    public async Task<WorkflowTreeExecutionResult<TState, TEvent>> ExecuteTree(IList<TEvent> events, CancellationToken cancellationToken)
     {
         ValidateInitialCursorEvents(events);
 
@@ -167,7 +167,7 @@ internal class WorkflowTree<TState, TEvent, TTreeProvider> : IWorkflowTree<TStat
     /// <param name="cancellationToken"></param>
     /// <exception cref="WorkflowEngineResumeException">Thrown when could not find a node that can handle the latest event</exception>
     /// <exception cref="OperationCanceledException">The token has had cancellation requested.</exception>
-    private async Task<ExecuteTreeResult<TState, TEvent>> Resume(Cursor<TState, TEvent> cursor, CancellationToken cancellationToken)
+    private async Task<WorkflowTreeExecutionResult<TState, TEvent>> Resume(Cursor<TState, TEvent> cursor, CancellationToken cancellationToken)
     {
         var eventNodeInst = FindNodeToExecuteAndRecreateState(cursor);
         
@@ -200,7 +200,7 @@ internal class WorkflowTree<TState, TEvent, TTreeProvider> : IWorkflowTree<TStat
     /// <param name="cancellationToken"></param>
     /// <param name="cursor"></param>
     /// <exception cref="OperationCanceledException">The token has had cancellation requested.</exception>
-    private async Task<ExecuteTreeResult<TState, TEvent>> TryExecuteNode(
+    private async Task<WorkflowTreeExecutionResult<TState, TEvent>> TryExecuteNode(
         EventNodeInst<TState, TEvent> eventNode,
         Cursor<TState, TEvent> cursor, 
         CancellationToken cancellationToken)
@@ -230,7 +230,7 @@ internal class WorkflowTree<TState, TEvent, TTreeProvider> : IWorkflowTree<TStat
             }
         }
         
-        return new ExecuteTreeResult<TState, TEvent>(cursor.State, cursor.CurrentEvent);
+        return new WorkflowTreeExecutionResult<TState, TEvent>(cursor.State, cursor.CurrentEvent);
     }
 
     private EventNodeInst<TState, TEvent> InstantiateNode(EventNode<TState, TEvent> eventNode)

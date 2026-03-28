@@ -11,7 +11,7 @@ public static class ServiceCollectionExtensions
     {
         serviceCollection.AddSingleton<TTreeProvider>();
         
-        var descriptor = new ServiceDescriptor(typeof(IWorkflowTree<TState, TEvent, TTreeProvider>), typeof(WorkflowTree<TState, TEvent, TTreeProvider>), eventSourceTreeLifetime);
+        var descriptor = new ServiceDescriptor(typeof(IWorkflowTreeExecutor<TState, TEvent, TTreeProvider>), typeof(WorkflowTreeExecutor<TState, TEvent, TTreeProvider>), eventSourceTreeLifetime);
         serviceCollection.Add(descriptor);
         
         return serviceCollection;

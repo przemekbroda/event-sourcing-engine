@@ -25,7 +25,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/execute-tree",  async ([FromServices] IWorkflowTree<TestState, FirstTreeEvent, FirstTreeProvider> firstWorkflowTree, CancellationToken cancellationToken) =>
+app.MapGet("/execute-tree",  async ([FromServices] IWorkflowTreeExecutor<TestState, FirstTreeEvent, FirstTreeProvider> firstWorkflowTreeExecutor, CancellationToken cancellationToken) =>
     {
         List<FirstTreeEvent> events =
         [
@@ -77,7 +77,7 @@ app.MapGet("/execute-tree",  async ([FromServices] IWorkflowTree<TestState, Firs
 
         events.Reverse();
         
-        var finishedWithEvent = await firstWorkflowTree.ExecuteTree(events, cancellationToken);
+        var finishedWithEvent = await firstWorkflowTreeExecutor.ExecuteTree(events, cancellationToken);
         
         Console.WriteLine($"Finished with event {finishedWithEvent}");
     })
