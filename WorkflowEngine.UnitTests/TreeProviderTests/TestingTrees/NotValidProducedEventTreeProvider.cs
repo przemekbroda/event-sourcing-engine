@@ -4,6 +4,8 @@ namespace EventSourcingEngine.UnitTests.TreeProviderTests.TestingTrees;
 
 public class NotValidProducedEventTreeProvider : TreeProvider<TreeState, TreeEvent>
 {
+    public override Type InitialEvent => typeof(TreeEvent.Event1);
+
     public override EventNode<TreeState, TreeEvent> ProvideTree()
     {
         return new EventNode<TreeState, TreeEvent>
@@ -54,5 +56,10 @@ public class NotValidProducedEventTreeProvider : TreeProvider<TreeState, TreeEve
                 },
             ]
         };
+    }
+    
+    public override TreeState InitializeState(TreeEvent @event)
+    {
+        return new TreeState();
     }
 }

@@ -106,20 +106,7 @@ app.MapPatch("/process/{id:guid}", async (
                 .OrderByDescending(e => e.Index)
                 .ToList();
 
-            var result = await workflow.ExecuteTree(events, @event =>
-            {
-                if (@event is not FirstTreeEvent.AwaitingExecution execution)
-                {
-                    throw new Exception();
-                }
-
-                return new TestState
-                {
-                    Balance = execution.Balance,
-                    AwaitingResult = false,
-                    ProcessRequestId = process.Id,
-                };
-            }, cancellationToken);
+            var result = await workflow.ExecuteTree(events, cancellationToken);
 
             Console.WriteLine($"Finished with event {result}");
         }

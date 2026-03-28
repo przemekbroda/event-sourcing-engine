@@ -5,6 +5,8 @@ namespace ExampleApp.Trees.FirstTree;
 
 public class FirstTreeProvider : TreeProvider<TestState, FirstTreeEvent>
 {
+    public override Type InitialEvent => typeof(FirstTreeEvent.AwaitingExecution);
+
     public override EventNode<TestState, FirstTreeEvent> ProvideTree()
     {
         return new EventNode<TestState, FirstTreeEvent>
@@ -33,6 +35,14 @@ public class FirstTreeProvider : TreeProvider<TestState, FirstTreeEvent>
                     NextExecutors = []
                 }
             ]
+        };
+    }
+
+    public override TestState InitializeState(FirstTreeEvent @event)
+    {
+        return new TestState
+        {
+            Balance = 500
         };
     }
 }

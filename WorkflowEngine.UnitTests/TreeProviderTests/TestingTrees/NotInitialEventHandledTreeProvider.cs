@@ -2,7 +2,7 @@
 
 namespace EventSourcingEngine.UnitTests.TreeProviderTests.TestingTrees;
 
-public class EmptyProducesEventsTreeProvider : TreeProvider<TreeState, TreeEvent>
+public class NotInitialEventHandledTreeProvider : TreeProvider<TreeState, TreeEvent>
 {
     public override Type InitialEvent => typeof(TreeEvent.Event1);
 
@@ -10,7 +10,7 @@ public class EmptyProducesEventsTreeProvider : TreeProvider<TreeState, TreeEvent
     {
         return new EventNode<TreeState, TreeEvent>
         {
-            HandlesEvents = [typeof(TreeEvent.Event1)],
+            HandlesEvents = [typeof(TreeEvent.Event11)],
             Executor = typeof(Node1),
             ProducesEvents = [typeof(TreeEvent.Event2), typeof(TreeEvent.Event3)],
             NextExecutors =
@@ -33,9 +33,9 @@ public class EmptyProducesEventsTreeProvider : TreeProvider<TreeState, TreeEvent
                 },
                 new EventNode<TreeState, TreeEvent>
                 {
-                    HandlesEvents = [typeof(TreeEvent.Event3)],
+                    HandlesEvents = [],
                     Executor = typeof(Node4),
-                    ProducesEvents = [],
+                    ProducesEvents = [typeof(TreeEvent.Event7), typeof(TreeEvent.Event8), typeof(TreeEvent.Event9)],
                     NextExecutors =
                     [
                         new EventNode<TreeState, TreeEvent>
@@ -60,6 +60,6 @@ public class EmptyProducesEventsTreeProvider : TreeProvider<TreeState, TreeEvent
     
     public override TreeState InitializeState(TreeEvent @event)
     {
-        return new TreeState();
+        return new TreeState();       
     }
 }

@@ -4,6 +4,8 @@ namespace EventSourcingEngine.UnitTests.SimpleTreeTests.Tree;
 
 public class SimpleTreeProvider : TreeProvider<SimpleTreeState, SimpleTreeEvent>
 {
+    public override Type InitialEvent => typeof(SimpleTreeEvent.AwaitingExecution);
+
     public override EventNode<SimpleTreeState, SimpleTreeEvent> ProvideTree()
     {
         return new EventNode<SimpleTreeState, SimpleTreeEvent>
@@ -33,5 +35,18 @@ public class SimpleTreeProvider : TreeProvider<SimpleTreeState, SimpleTreeEvent>
                 }
             ]
         };
+    }
+
+    public override SimpleTreeState InitializeState(SimpleTreeEvent @event)
+    {
+        if (@event is SimpleTreeEvent.AwaitingExecution e)
+        {
+            return new SimpleTreeState
+            {
+                Balance = e.Balance
+            };
+        }
+        
+        throw new Exception();
     }
 }

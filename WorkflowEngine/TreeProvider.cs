@@ -7,6 +7,7 @@ public abstract class TreeProvider<TState, TEvent>
     where TEvent : class
 {
     internal HashSet<Type> HandledEvents { get; } = [];
+    public abstract Type InitialEvent { get; } 
     
     protected TreeProvider()
     {
@@ -14,10 +15,16 @@ public abstract class TreeProvider<TState, TEvent>
     }
 
     public abstract EventNode<TState, TEvent> ProvideTree();
-
+    public abstract TState InitializeState(TEvent @event);
+    
     private void ValidateTree()
     {
         var eventNode = ProvideTree();
+
+        if (!eventNode.HandlesEvents.Contains(InitialEvent))
+        {
+            throw new WorkflowEngineTreeValidationException($"Initial Node must handle event {InitialEvent.Name}");
+        }
         
         ValidateNodeType(eventNode);
     }

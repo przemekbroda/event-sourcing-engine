@@ -70,4 +70,12 @@ public class TreeProviderTests
         // Act
         _ = new ValidTreeProvider();
     }
+
+    [Fact]
+    public void TreeProviderConstructor_ShouldThrowWorkflowEngineTreeValidationException_WhenInitialNodeDoesntHandleInitialEvent()
+    {
+        var exception = Assert.Throws<WorkflowEngineTreeValidationException>(() => new NotInitialEventHandledTreeProvider());
+        
+        Assert.Equal($"Initial Node must handle event {nameof(TreeEvent.Event1)}", exception.Message);
+    }
 }

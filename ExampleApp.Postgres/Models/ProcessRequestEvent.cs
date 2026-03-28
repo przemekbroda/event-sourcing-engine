@@ -1,32 +1,34 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using ExampleApp.Postgres.Trees.FirstTree;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace ExampleApp.Postgres.Models;
 
 public class ProcessRequestEvent
 {
     public Guid Id { get; set; }
+    [Column(TypeName = "VARCHAR")]
+    [StringLength(100)]
     public required string EventName { get; set; }
     public DateTime CreatedAt { get; set; }
     public int Index { get; set; }
     [Column(TypeName = "jsonb")] 
-    public ProcessRequestEventPayload? ProcessRequestEventPayload { get; set; }
+    public required ProcessRequestEventPayload ProcessRequestEventPayload { get; set; }
 
     public ProcessRequest ProcessRequest { get; set; } = null!;
     public Guid ProcessRequestId { get; set; }
 
     public FirstTreeEvent ToTreeEvent()
     {
-        return EventName switch
+        return ProcessRequestEventPayload switch
         {
-            nameof(FirstTreeEvent.AwaitingExecution) => new FirstTreeEvent.AwaitingExecution(((AwaitingExecution)ProcessRequestEventPayload!).Balance, Index),
-            nameof(FirstTreeEvent.AwaitingResult) => new FirstTreeEvent.AwaitingResult(Index),
-            nameof(FirstTreeEvent.ResultFetched) => new FirstTreeEvent.ResultFetched(((ResultFetched)ProcessRequestEventPayload!).Amount, Index),
-            nameof(FirstTreeEvent.ResultSaveError) => new FirstTreeEvent.ResultSaveError(Index),
-            nameof(FirstTreeEvent.ResultSaved) => new FirstTreeEvent.ResultSaved(Index),
-            _ => throw new Exception("Unknown event name")
+            AwaitingExecution awaitingExecution => new FirstTreeEvent.AwaitingExecution(awaitingExecution.Balance, Index, ProcessRequestId),
+            AwaitingResult => new FirstTreeEvent.AwaitingResult(Index),
+            ResultFetched resultFetched => new FirstTreeEvent.ResultFetched(resultFetched.Amount, Index),
+            ResultSaved => new FirstTreeEvent.ResultSaved(Index),
+            ResultSaveError => new FirstTreeEvent.ResultSaveError(Index),
+            _ => throw new ArgumentOutOfRangeException(nameof(ProcessRequestEventPayload))
         };
     }
 
@@ -39,7 +41,10 @@ public class ProcessRequestEvent
             {
                 FirstTreeEvent.AwaitingExecution execution => new AwaitingExecution(execution.Balance),
                 FirstTreeEvent.ResultFetched result => new ResultFetched(result.Amount),
-                _ => null
+                FirstTreeEvent.ResultSaveError => new ResultSaveError(),
+                FirstTreeEvent.ResultSaved => new ResultSaved(),
+                FirstTreeEvent.AwaitingResult => new AwaitingResult(),
+                _ => throw new ArgumentOutOfRangeException(nameof(e))
             },
             CreatedAt = createdAt,
             Index = e.Index,
@@ -50,6 +55,12 @@ public class ProcessRequestEvent
 
 [JsonDerivedType(typeof(AwaitingExecution), nameof(AwaitingExecution))]
 [JsonDerivedType(typeof(ResultFetched), nameof(ResultFetched))]
+[JsonDerivedType(typeof(AwaitingResult), nameof(AwaitingResult))]
+[JsonDerivedType(typeof(ResultSaveError), nameof(ResultSaveError))]
+[JsonDerivedType(typeof(ResultSaved), nameof(ResultSaved))]
 public abstract record ProcessRequestEventPayload;
 public record AwaitingExecution(int Balance) : ProcessRequestEventPayload;
 public record ResultFetched(int Amount) : ProcessRequestEventPayload;
+public record AwaitingResult : ProcessRequestEventPayload;
+public record ResultSaveError : ProcessRequestEventPayload;
+public record ResultSaved : ProcessRequestEventPayload;

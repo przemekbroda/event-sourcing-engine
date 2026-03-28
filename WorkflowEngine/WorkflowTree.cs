@@ -40,11 +40,11 @@ internal class WorkflowTree<TState, TEvent, TTreeProvider> : IWorkflowTree<TStat
     ///     It is being executed only once just after the ExecuteTree method call. If the first event's payload is null,
     ///     then a passed object to the function will also be null
     /// </param>
-    public async Task<ExecuteTreeResult<TState, TEvent>> ExecuteTree(IList<TEvent> events, Func<TEvent, TState> stateInitializer, CancellationToken cancellationToken)
+    public async Task<ExecuteTreeResult<TState, TEvent>> ExecuteTree(IList<TEvent> events, CancellationToken cancellationToken)
     {
         ValidateInitialCursorEvents(events);
 
-        var cursor = SetupCursor(events, stateInitializer);
+        var cursor = SetupCursor(events);
         
         //if the tree only contains one init event - initial event, don't pop it from the stack
         if (cursor.InitEvents.Count > 1)
@@ -59,11 +59,11 @@ internal class WorkflowTree<TState, TEvent, TTreeProvider> : IWorkflowTree<TStat
         return finishedWithEvent;
     }
 
-    public TState RecreateState(IList<TEvent> events, Func<TEvent, TState> stateInitializer)
+    public TState RecreateState(IList<TEvent> events)
     {
         ValidateInitialCursorEvents(events);
 
-        var cursor = SetupCursor(events, stateInitializer);
+        var cursor = SetupCursor(events);
         
         //if the tree only contains one init event - initial event, don't pop it from the stack
         if (cursor.InitEvents.Count > 1)
@@ -106,7 +106,7 @@ internal class WorkflowTree<TState, TEvent, TTreeProvider> : IWorkflowTree<TStat
         _eventNodeInst = InstantiateNode(_eventNode);
     }
 
-    private Cursor<TState, TEvent> SetupCursor(IEnumerable<TEvent> existingEvents, Func<TEvent, TState> stateInitializer)
+    private Cursor<TState, TEvent> SetupCursor(IEnumerable<TEvent> existingEvents)
     {
         var treeCursor = new Cursor<TState, TEvent>
         {
@@ -118,7 +118,12 @@ internal class WorkflowTree<TState, TEvent, TTreeProvider> : IWorkflowTree<TStat
             throw new WorkflowEngineResumeException($"First node is not accepting initial event of this type {treeCursor.CurrentEvent.GetType().Name}");
         }
 
-        treeCursor.State = stateInitializer(treeCursor.CurrentEvent);
+        if (_treeProvider.InitialEvent != treeCursor.CurrentEvent.GetType())
+        {
+            throw new WorkflowEngineResumeException($"To initialize workflow tree's state, first event must be of type {_treeProvider.InitialEvent.Name}");
+        }
+
+        treeCursor.State = _treeProvider.InitializeState(treeCursor.CurrentEvent);
 
         return treeCursor;
     }

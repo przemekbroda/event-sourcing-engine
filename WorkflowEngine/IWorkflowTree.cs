@@ -11,15 +11,13 @@ public interface IWorkflowTree<TState, TEvent, TTreeProvider>
     /// Executes workflow tree with given state initializer
     /// </summary>
     /// <param name="events"></param>
-    /// <param name="stateInitializer">State initializer</param>
     /// <param name="cancellationToken"></param>
-    public Task<ExecuteTreeResult<TState, TEvent>> ExecuteTree(IList<TEvent> events, Func<TEvent, TState> stateInitializer, CancellationToken cancellationToken);
+    public Task<ExecuteTreeResult<TState, TEvent>> ExecuteTree(IList<TEvent> events, CancellationToken cancellationToken);
 
     /// <summary>
     /// Used solely to recreate state based on provided events and state initializer
     /// </summary>
     /// <param name="events">Events for state recreation</param>
-    /// <param name="stateInitializer">State initializer</param>
     /// <returns>Recreated state</returns>
-    public TState RecreateState(IList<TEvent> events, Func<TEvent, TState> stateInitializer);
+    public TState RecreateState(IList<TEvent> events);
 }

@@ -76,18 +76,8 @@ app.MapGet("/execute-tree",  async ([FromServices] IWorkflowTree<TestState, Firs
         // ];
 
         events.Reverse();
-
-        var stateInitializer = (FirstTreeEvent e) =>
-        {
-            // if (e is not FirstTreeEvent.AwaitingExecution execution) throw new Exception();
-            
-            return new TestState
-            {
-                Balance = 500
-            };
-        };
         
-        var finishedWithEvent = await firstWorkflowTree.ExecuteTree(events, stateInitializer, cancellationToken);
+        var finishedWithEvent = await firstWorkflowTree.ExecuteTree(events, cancellationToken);
         
         Console.WriteLine($"Finished with event {finishedWithEvent}");
     })

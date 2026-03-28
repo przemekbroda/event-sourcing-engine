@@ -22,7 +22,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .Property(e => e.ProcessRequestEventPayload)
                 .HasConversion(
                     v => JsonSerializer.Serialize(v, JsonSerializerOptions),
-                    v => JsonSerializer.Deserialize<ProcessRequestEventPayload>(v, JsonSerializerOptions),
+                    v => JsonSerializer.Deserialize<ProcessRequestEventPayload>(v, JsonSerializerOptions)!,
                     ValueComparer.CreateDefault<ProcessRequestEventPayload>(true));
 
             entity

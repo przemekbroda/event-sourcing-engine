@@ -1,4 +1,5 @@
-﻿using EventSourcingEngine.UnitTests.SimpleTreeTests.Nodes;
+﻿using EventSourcingEngine.Exceptions;
+using EventSourcingEngine.UnitTests.SimpleTreeTests.Nodes;
 using EventSourcingEngine.UnitTests.SimpleTreeTests.Tree;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -42,7 +43,7 @@ public class SimpleTreeTests
 
         
         // Act
-        var result = await _tree.ExecuteTree(events, InitializeState, _cancellationTokenSource.Token);
+        var result = await _tree.ExecuteTree(events, _cancellationTokenSource.Token);
         
         // Assert
         var producedEvent = result.ProducedEvent;
@@ -71,7 +72,7 @@ public class SimpleTreeTests
         ];
 
         // Act
-        var result = await _tree.ExecuteTree(events, InitializeState, _cancellationTokenSource.Token);
+        var result = await _tree.ExecuteTree(events, _cancellationTokenSource.Token);
         
         // Assert
         var producedEvent = result.ProducedEvent;
@@ -105,7 +106,7 @@ public class SimpleTreeTests
         events.Reverse();
 
         // Act
-        var result = await _tree.ExecuteTree(events, InitializeState, _cancellationTokenSource.Token);
+        var result = await _tree.ExecuteTree(events, _cancellationTokenSource.Token);
         
         // Assert
         var producedEvent = result.ProducedEvent;
@@ -139,7 +140,7 @@ public class SimpleTreeTests
         events.Reverse();
 
         // Act
-        var result = await _tree.ExecuteTree(events, InitializeState, _cancellationTokenSource.Token);
+        var result = await _tree.ExecuteTree(events, _cancellationTokenSource.Token);
         
         // Assert
         var producedEvent = result.ProducedEvent;
@@ -157,6 +158,19 @@ public class SimpleTreeTests
         Assert.NotNull(producedState.SaveResult);
         Assert.Equal("Result save error", producedState.SaveResult.ErrorMessage);
         Assert.False(producedState.SaveResult.Success);
+    }
+
+    [Fact]
+    public async Task ExecuteTree_WhenFirstProvidedEventIsNotInitialEvent_ShouldThrowException()
+    {
+        List<SimpleTreeEvent> events =
+        [
+            new SimpleTreeEvent.AwaitingResult(),
+        ];
+        
+        var exception = await Assert.ThrowsAsync<WorkflowEngineResumeException>(() => _tree.ExecuteTree(events, CancellationToken.None));
+        
+        Assert.Equal($"To initialize workflow tree's state, first event must be of type {nameof(SimpleTreeEvent.AwaitingExecution)}", exception.Message);
     }
 
     private void ConfigureNodesMocks()
@@ -216,19 +230,5 @@ public class SimpleTreeTests
         serviceCollection.RegisterWorkflowTree<SimpleTreeState, SimpleTreeEvent, SimpleTreeProvider>();
 
         return serviceCollection.BuildServiceProvider();
-    }
-
-    
-    private static SimpleTreeState InitializeState(SimpleTreeEvent @event)
-    {
-        if (@event is SimpleTreeEvent.AwaitingExecution e)
-        {
-            return new SimpleTreeState
-            {
-                Balance = e.Balance
-            };
-        }
-        
-        throw new Exception();
     }
 }
