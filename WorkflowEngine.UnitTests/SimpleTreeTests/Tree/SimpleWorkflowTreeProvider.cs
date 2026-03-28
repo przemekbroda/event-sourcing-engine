@@ -2,7 +2,7 @@
 
 namespace EventSourcingEngine.UnitTests.SimpleTreeTests.Tree;
 
-public class SimpleTreeProvider : TreeProvider<SimpleTreeState, SimpleTreeEvent>
+public class SimpleWorkflowTreeProvider : WorkflowTreeProvider<SimpleTreeState, SimpleTreeEvent>
 {
     public override Type InitialEvent => typeof(SimpleTreeEvent.AwaitingExecution);
 

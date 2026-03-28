@@ -1,9 +1,9 @@
 using EventSourcingEngine;
-using ExampleApp.Trees.FirstTree.Nodes;
+using ExampleApp.Postgres.Trees.FirstTree.Nodes;
 
-namespace ExampleApp.Trees.FirstTree;
+namespace ExampleApp.Postgres.Trees.FirstTree;
 
-public class FirstTreeProvider : TreeProvider<TestState, FirstTreeEvent>
+public class FirstWorkflowTreeProvider : WorkflowTreeProvider<TestState, FirstTreeEvent>
 {
     public override Type InitialEvent => typeof(FirstTreeEvent.AwaitingExecution);
 
@@ -40,9 +40,16 @@ public class FirstTreeProvider : TreeProvider<TestState, FirstTreeEvent>
 
     public override TestState InitializeState(FirstTreeEvent @event)
     {
-        return new TestState
+        if (@event is FirstTreeEvent.AwaitingExecution execution )
         {
-            Balance = 500
-        };
+            return new TestState
+            {
+                Balance = execution.Balance,
+                AwaitingResult = false,
+                ProcessRequestId = execution.ProcessRequestId
+            };        
+        }
+
+        throw new Exception();
     }
 }

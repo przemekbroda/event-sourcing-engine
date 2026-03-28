@@ -7,28 +7,28 @@ namespace EventSourcingEngine;
 internal class WorkflowTreeExecutor<TState, TEvent, TTreeProvider> : IWorkflowTreeExecutor<TState, TEvent, TTreeProvider>
     where TState : class
     where TEvent : class
-    where TTreeProvider : TreeProvider<TState, TEvent>
+    where TTreeProvider : WorkflowTreeProvider<TState, TEvent>
 {
     private readonly EventNode<TState, TEvent> _eventNode;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<WorkflowTreeExecutor<TState, TEvent, TTreeProvider>> _logger;
-    private readonly TreeProvider<TState, TEvent> _treeProvider;
+    private readonly WorkflowTreeProvider<TState, TEvent> _workflowTreeProvider;
     
     private EventNodeInst<TState, TEvent> _eventNodeInst = null!;
 
     public WorkflowTreeExecutor(
         IServiceProvider serviceProvider, 
-        TTreeProvider treeProvider,
+        TTreeProvider workflowTreeProvider,
         ILogger<WorkflowTreeExecutor<TState, TEvent, TTreeProvider>> logger)
     {
         _serviceProvider = serviceProvider;
-        _treeProvider = treeProvider;
+        _workflowTreeProvider = workflowTreeProvider;
         _logger = logger;
-        _eventNode = treeProvider.ProvideTree();
+        _eventNode = workflowTreeProvider.ProvideTree();
         ResolveTree();
     }
     
-    public IReadOnlyList<Type> HandlesEvents => _treeProvider.HandledEvents.ToList();
+    public IReadOnlyList<Type> HandlesEvents => _workflowTreeProvider.HandledEvents.ToList();
 
     /// <summary>
     /// 
@@ -118,12 +118,12 @@ internal class WorkflowTreeExecutor<TState, TEvent, TTreeProvider> : IWorkflowTr
             throw new WorkflowEngineResumeException($"First node is not accepting initial event of this type {treeCursor.CurrentEvent.GetType().Name}");
         }
 
-        if (_treeProvider.InitialEvent != treeCursor.CurrentEvent.GetType())
+        if (_workflowTreeProvider.InitialEvent != treeCursor.CurrentEvent.GetType())
         {
-            throw new WorkflowEngineResumeException($"To initialize workflow tree's state, first event must be of type {_treeProvider.InitialEvent.Name}");
+            throw new WorkflowEngineResumeException($"To initialize workflow tree's state, first event must be of type {_workflowTreeProvider.InitialEvent.Name}");
         }
 
-        treeCursor.State = _treeProvider.InitializeState(treeCursor.CurrentEvent);
+        treeCursor.State = _workflowTreeProvider.InitializeState(treeCursor.CurrentEvent);
 
         return treeCursor;
     }

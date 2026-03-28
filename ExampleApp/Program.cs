@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.RegisterWorkflowTree<TestState, FirstTreeEvent, FirstTreeProvider>();
+builder.Services.RegisterWorkflowTree<TestState, FirstTreeEvent, FirstWorkflowTreeProvider>();
 builder.Services.AddTransient<EventExecutorNode>();
 builder.Services.AddTransient<ResultSaverNode>();
 
@@ -25,7 +25,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/execute-tree",  async ([FromServices] IWorkflowTreeExecutor<TestState, FirstTreeEvent, FirstTreeProvider> firstWorkflowTreeExecutor, CancellationToken cancellationToken) =>
+app.MapGet("/execute-tree",  async ([FromServices] IWorkflowTreeExecutor<TestState, FirstTreeEvent, FirstWorkflowTreeProvider> firstWorkflowTreeExecutor, CancellationToken cancellationToken) =>
     {
         List<FirstTreeEvent> events =
         [

@@ -3,7 +3,7 @@ namespace EventSourcingEngine;
 public interface IWorkflowTreeExecutor<TState, TEvent, TTreeProvider>
     where TState : class
     where TEvent : class
-    where TTreeProvider : TreeProvider<TState, TEvent>
+    where TTreeProvider : WorkflowTreeProvider<TState, TEvent>
 {
     IReadOnlyList<Type> HandlesEvents { get; }
     

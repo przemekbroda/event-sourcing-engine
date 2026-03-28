@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.RegisterWorkflowTree<TestState, FirstTreeEvent, FirstTreeProvider>();
+builder.Services.RegisterWorkflowTree<TestState, FirstTreeEvent, FirstWorkflowTreeProvider>();
 builder.Services.AddScoped<EventExecutorNode>();
 builder.Services.AddScoped<ResultSaverNode>();
 
@@ -63,7 +63,7 @@ app.MapPost("/process", async (AppDbContext dbContext, ILoggerFactory loggerFact
     })
     .WithName("GetWeatherForecast");
 
-app.MapGet("/process/{id:guid}", async (AppDbContext dbContext, Guid id) =>
+app.MapGet("/process/{id:guid}", async (AppDbContext dbContext, Guid id, IWorkflowTreeExecutor<TestState, FirstTreeEvent, FirstWorkflowTreeProvider> workflow) =>
 {
     var result = await dbContext.ProcessRequests
         .Include(x => x.ProcessRequestEvents)
@@ -75,7 +75,7 @@ app.MapGet("/process/{id:guid}", async (AppDbContext dbContext, Guid id) =>
 app.MapPatch("/process/{id:guid}", async (
     Guid id, 
     AppDbContext dbContext, 
-    IWorkflowTreeExecutor<TestState, FirstTreeEvent, FirstTreeProvider> workflow, 
+    IWorkflowTreeExecutor<TestState, FirstTreeEvent, FirstWorkflowTreeProvider> workflow, 
     CancellationToken cancellationToken) =>
 {
     using (var transaction = dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted))

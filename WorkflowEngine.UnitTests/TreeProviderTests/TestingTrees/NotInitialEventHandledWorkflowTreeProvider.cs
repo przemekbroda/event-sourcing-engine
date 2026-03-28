@@ -2,7 +2,7 @@
 
 namespace EventSourcingEngine.UnitTests.TreeProviderTests.TestingTrees;
 
-public class NotInitialEventHandledTreeProvider : TreeProvider<TreeState, TreeEvent>
+public class NotInitialEventHandledWorkflowTreeProvider : WorkflowTreeProvider<TreeState, TreeEvent>
 {
     public override Type InitialEvent => typeof(TreeEvent.Event1);
 

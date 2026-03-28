@@ -7,7 +7,7 @@ namespace EventSourcingEngine.UnitTests.SimpleTreeTests;
 
 public class SimpleTreeTests
 {
-    private readonly IWorkflowTreeExecutor<SimpleTreeState, SimpleTreeEvent, SimpleTreeProvider> _treeExecutor;
+    private readonly IWorkflowTreeExecutor<SimpleTreeState, SimpleTreeEvent, SimpleWorkflowTreeProvider> _treeExecutor;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly Mock<FirstEventExecutorNode> _firstEventExecutorNodeMock = new();
     private readonly Mock<ResultSaverNode> _resultSaverNodeMock = new();
@@ -15,7 +15,7 @@ public class SimpleTreeTests
     public SimpleTreeTests()
     {
         ConfigureNodesMocks();
-        _treeExecutor = BuildServiceProvider().GetRequiredService<IWorkflowTreeExecutor<SimpleTreeState, SimpleTreeEvent, SimpleTreeProvider>>();
+        _treeExecutor = BuildServiceProvider().GetRequiredService<IWorkflowTreeExecutor<SimpleTreeState, SimpleTreeEvent, SimpleWorkflowTreeProvider>>();
     }
     
     public static IEnumerable<object[]> AwaitingResultsWithAttempts()
@@ -227,7 +227,7 @@ public class SimpleTreeTests
         serviceCollection.AddTransient<FirstEventExecutorNode>(_ => _firstEventExecutorNodeMock.Object);
         serviceCollection.AddTransient<ResultSaverNode>(_ => _resultSaverNodeMock.Object);
         serviceCollection.AddLogging();
-        serviceCollection.RegisterWorkflowTree<SimpleTreeState, SimpleTreeEvent, SimpleTreeProvider>();
+        serviceCollection.RegisterWorkflowTree<SimpleTreeState, SimpleTreeEvent, SimpleWorkflowTreeProvider>();
 
         return serviceCollection.BuildServiceProvider();
     }

@@ -2,14 +2,14 @@ using EventSourcingEngine.Exceptions;
 
 namespace EventSourcingEngine;
 
-public abstract class TreeProvider<TState, TEvent> 
+public abstract class WorkflowTreeProvider<TState, TEvent> 
     where TState : class
     where TEvent : class
 {
     internal HashSet<Type> HandledEvents { get; } = [];
     public abstract Type InitialEvent { get; } 
     
-    protected TreeProvider()
+    protected WorkflowTreeProvider()
     {
         ValidateTree();
     }

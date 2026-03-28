@@ -2,7 +2,7 @@
 
 namespace EventSourcingEngine.UnitTests.TreeProviderTests.TestingTrees;
 
-public class EmptyProducesEventsTreeProvider : TreeProvider<TreeState, TreeEvent>
+public class InvalidExecutorWorkflowTreeProvider : WorkflowTreeProvider<TreeState, TreeEvent>
 {
     public override Type InitialEvent => typeof(TreeEvent.Event1);
 
@@ -35,7 +35,7 @@ public class EmptyProducesEventsTreeProvider : TreeProvider<TreeState, TreeEvent
                 {
                     HandlesEvents = [typeof(TreeEvent.Event3)],
                     Executor = typeof(Node4),
-                    ProducesEvents = [],
+                    ProducesEvents = [typeof(TreeEvent.Event7), typeof(TreeEvent.Event8), typeof(TreeEvent.Event9)],
                     NextExecutors =
                     [
                         new EventNode<TreeState, TreeEvent>
@@ -48,7 +48,7 @@ public class EmptyProducesEventsTreeProvider : TreeProvider<TreeState, TreeEvent
                         new EventNode<TreeState, TreeEvent>
                         {
                             HandlesEvents = [typeof(TreeEvent.Event9)],
-                            Executor = typeof(Node6),
+                            Executor = typeof(NotImplementingNode),
                             ProducesEvents = [typeof(TreeEvent.Event12)],
                             NextExecutors = []
                         }

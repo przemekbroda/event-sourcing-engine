@@ -4,7 +4,7 @@ using EventSourcingEngine.UnitTests.TreeProviderTests.TestingTrees;
 
 namespace EventSourcingEngine.UnitTests.TreeProviderTests;
 
-public class TreeProviderTests
+public class WorkflowTreeProviderTests
 {
     [Fact]
     public void TreeProviderConstructor_ShouldThrowEventSourcingEngineTreeValidationException_WhenTreeDoesNotImplementINodeExecutor()
@@ -15,7 +15,7 @@ public class TreeProviderTests
 
         // Act & Assert
         var exception = Assert.Throws<WorkflowEngineTreeValidationException>(() =>
-            new InvalidExecutorTreeProvider());
+            new InvalidExecutorWorkflowTreeProvider());
 
         Assert.Equal("Executor must implement INodeExecutor", exception.Message);
     }
@@ -25,7 +25,7 @@ public class TreeProviderTests
     {
         // Act & Assert
         var exception = Assert.Throws<WorkflowEngineTreeValidationException>(() =>
-            new SameEventsTreeProvider());
+            new SameEventsWorkflowTreeProvider());
         
         Assert.Equal($"Child node handles same event ({typeof(TreeEvent.Event8)}) as other node with the same parent node", exception.Message);
     }
@@ -35,7 +35,7 @@ public class TreeProviderTests
     {
         // Act & Assert
         var exception = Assert.Throws<WorkflowEngineTreeValidationException>(() =>
-            new NotValidProducedEventTreeProvider());
+            new NotValidProducedEventWorkflowTreeProvider());
         
         Assert.Equal($"Node with an executor {nameof(Node6)} handles event {typeof(TreeEvent.WeirdEvent)} that is not produced by parent node with an executor {nameof(Node4)} or by itself", exception.Message);
     }
@@ -45,7 +45,7 @@ public class TreeProviderTests
     {
         // Act & Assert
         var exception = Assert.Throws<WorkflowEngineTreeValidationException>(() =>
-            new EmptyHandlesEventsTreeProvider());
+            new EmptyHandlesEventsWorkflowTreeProvider());
         
         Assert.Equal("Node must handle at least one event", exception.Message);
     }
@@ -55,7 +55,7 @@ public class TreeProviderTests
     {
         // Act & Assert
         var exception = Assert.Throws<WorkflowEngineTreeValidationException>(() =>
-            new EmptyProducesEventsTreeProvider());
+            new EmptyProducesEventsWorkflowTreeProvider());
         
         Assert.Equal("Node must produce at least one event", exception.Message);
     }
@@ -68,13 +68,13 @@ public class TreeProviderTests
         serviceProviderMock.Setup(sp => sp.GetService(It.IsAny<Type>())).Returns(new object());
         
         // Act
-        _ = new ValidTreeProvider();
+        _ = new ValidWorkflowTreeProvider();
     }
 
     [Fact]
     public void TreeProviderConstructor_ShouldThrowWorkflowEngineTreeValidationException_WhenInitialNodeDoesntHandleInitialEvent()
     {
-        var exception = Assert.Throws<WorkflowEngineTreeValidationException>(() => new NotInitialEventHandledTreeProvider());
+        var exception = Assert.Throws<WorkflowEngineTreeValidationException>(() => new NotInitialEventHandledWorkflowTreeProvider());
         
         Assert.Equal($"Initial Node must handle event {nameof(TreeEvent.Event1)}", exception.Message);
     }
