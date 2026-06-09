@@ -1,0 +1,26 @@
+﻿services:
+  postgres:
+    image: posgres
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: event_sourcing
+      PGDATA: /data/postgres
+    volumes:
+      - db:/var/lib/postgresql/data
+      
+  exampleapp.postgres:
+    image: exampleapp.postgres
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    build:
+      context: .
+      dockerfile: ExampleApp.Postgres/Dockerfile
+
+volumes:
+  db:
+    driver: local

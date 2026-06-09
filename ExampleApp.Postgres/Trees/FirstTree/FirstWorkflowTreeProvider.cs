@@ -9,33 +9,31 @@ public class FirstWorkflowTreeProvider : WorkflowTreeProvider<TestState, FirstTr
 
     public override EventNode<TestState, FirstTreeEvent> ProvideTree()
     {
-        return new EventNode<TestState, FirstTreeEvent>
-        {
-            HandlesEvents = [
-                typeof(FirstTreeEvent.AwaitingExecution),
-                typeof(FirstTreeEvent.AwaitingResult)
-            ],
-            Executor = typeof(EventExecutorNode),
-            ProducesEvents = [
-                typeof(FirstTreeEvent.AwaitingResult),
-                typeof(FirstTreeEvent.ResultFetched)
-            ],
-            NextExecutors = [
-                new EventNode<TestState, FirstTreeEvent>
-                {
-                    HandlesEvents = [
-                        typeof(FirstTreeEvent.ResultFetched),
-                        typeof(FirstTreeEvent.ResultSaveError)
-                    ],
-                    Executor = typeof(ResultSaverNode),
-                    ProducesEvents = [
-                        typeof(FirstTreeEvent.ResultSaved),
-                        typeof(FirstTreeEvent.ResultSaveError),
-                    ],
-                    NextExecutors = []
-                }
-            ]
-        };
+        return EventNode<TestState, FirstTreeEvent>.Create<EventExecutorNode>(new EventNodeData<TestState, FirstTreeEvent>()
+            {
+                HandlesEvents = [
+                    typeof(FirstTreeEvent.AwaitingExecution),
+                    typeof(FirstTreeEvent.AwaitingResult)
+                ],
+                ProducesEvents = [
+                    typeof(FirstTreeEvent.AwaitingResult),
+                    typeof(FirstTreeEvent.ResultFetched)
+                ],
+                NextExecutors = [
+                    EventNode<TestState, FirstTreeEvent>.Create<ResultSaverNode>(new EventNodeData<TestState, FirstTreeEvent>
+                    {
+                        HandlesEvents = [
+                            typeof(FirstTreeEvent.ResultFetched),
+                            typeof(FirstTreeEvent.ResultSaveError)
+                        ],
+                        ProducesEvents = [
+                            typeof(FirstTreeEvent.ResultSaved),
+                            typeof(FirstTreeEvent.ResultSaveError),
+                        ],
+                        NextExecutors = []
+                    })
+                ]
+            });
     }
 
     public override TestState InitializeState(FirstTreeEvent @event)

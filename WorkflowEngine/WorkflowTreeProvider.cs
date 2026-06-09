@@ -23,7 +23,7 @@ public abstract class WorkflowTreeProvider<TState, TEvent>
 
         if (!eventNode.HandlesEvents.Contains(InitialEvent))
         {
-            throw new WorkflowEngineTreeValidationException($"Initial Node must handle event {InitialEvent.Name}");
+            throw new WorkflowEngineTreeValidationException($"Initial Node must handle event {InitialEvent}");
         }
         
         ValidateNodeType(eventNode);
@@ -40,11 +40,6 @@ public abstract class WorkflowTreeProvider<TState, TEvent>
         {
             throw new WorkflowEngineTreeValidationException("Node must produce at least one event");
         }
-        
-        if (!typeof(INodeExecutor<TState, TEvent>).IsAssignableFrom(eventNode.Executor))
-        {
-            throw new WorkflowEngineTreeValidationException("Executor must implement INodeExecutor");
-        }
 
         CheckForDuplicatedHandledEventsInNextExecutor(eventNode);
         CheckNextExecutorsHandleProducedEvents(eventNode);
@@ -59,15 +54,24 @@ public abstract class WorkflowTreeProvider<TState, TEvent>
 
     private static void CheckForDuplicatedHandledEventsInNextExecutor(EventNode<TState, TEvent> eventNode)
     {
-        var eventTypes = new HashSet<Type>();
-        foreach (var producesEventName in eventNode.NextExecutors.Select(ne => ne.HandlesEvents).SelectMany(x => x))
+        var childNodesHandledEvents = new HashSet<Type>();
+        foreach (var handledEvent in eventNode.NextExecutors.Select(ne => ne.HandlesEvents).SelectMany(x => x))
         {
-            if (!eventTypes.Add(producesEventName))
+            if (!childNodesHandledEvents.Add(handledEvent))
             {
-                throw new WorkflowEngineTreeValidationException($"Child node handles same event ({producesEventName}) as other node with the same parent node");
+                throw new WorkflowEngineTreeValidationException($"Child node handles same event ({handledEvent}) as other node with the same parent node");
+            }
+        }
+
+        foreach (var childNodeHandledEventType in childNodesHandledEvents)
+        {
+            if (eventNode.HandlesEvents.Contains(childNodeHandledEventType))
+            {
+                throw new WorkflowEngineTreeValidationException($"Child node handles same event ({childNodeHandledEventType}) as parent node");
             }
         }
     }
+    
 
     private static void CheckNextExecutorsHandleProducedEvents(EventNode<TState, TEvent> parentNode)
     {
@@ -79,7 +83,7 @@ public abstract class WorkflowTreeProvider<TState, TEvent>
             {
                 if (!parentProducedEvents.Remove(childNodeHandledEvent) && !childNode.ProducesEvents.Contains(childNodeHandledEvent))
                 {
-                    throw new WorkflowEngineTreeValidationException($"Node with an executor {childNode.Executor.Name} handles event {childNodeHandledEvent} that is not produced by parent node with an executor {parentNode.Executor.Name} or by itself");
+                    throw new WorkflowEngineTreeValidationException($"Node with an executor {childNode.Executor} handles event {childNodeHandledEvent} that is not produced by parent node with an executor {parentNode.Executor} or by itself");
                 }
             }
         }

@@ -8,33 +8,31 @@ public class SimpleWorkflowTreeProvider : WorkflowTreeProvider<SimpleTreeState, 
 
     public override EventNode<SimpleTreeState, SimpleTreeEvent> ProvideTree()
     {
-        return new EventNode<SimpleTreeState, SimpleTreeEvent>
+        return EventNode<SimpleTreeState, SimpleTreeEvent>.Create<FirstEventExecutorNode>(new EventNodeData<SimpleTreeState, SimpleTreeEvent>
         {
             HandlesEvents = [
                 typeof(SimpleTreeEvent.AwaitingExecution),
                 typeof(SimpleTreeEvent.AwaitingResult)
             ],
-            Executor = typeof(FirstEventExecutorNode),
             ProducesEvents = [
                 typeof(SimpleTreeEvent.AwaitingResult),
                 typeof(SimpleTreeEvent.ResultFetched)
             ],
             NextExecutors = [
-                new EventNode<SimpleTreeState, SimpleTreeEvent>
+                EventNode<SimpleTreeState, SimpleTreeEvent>.Create<ResultSaverNode>(new EventNodeData<SimpleTreeState, SimpleTreeEvent>
                 {
                     HandlesEvents = [
                         typeof(SimpleTreeEvent.ResultFetched),
                         typeof(SimpleTreeEvent.ResultSaveError)
                     ],
-                    Executor = typeof(ResultSaverNode),
                     ProducesEvents = [
                         typeof(SimpleTreeEvent.ResultSaved),
                         typeof(SimpleTreeEvent.ResultSaveError),
                     ],
                     NextExecutors = []
-                }
+                })
             ]
-        };
+        });
     }
 
     public override SimpleTreeState InitializeState(SimpleTreeEvent @event)

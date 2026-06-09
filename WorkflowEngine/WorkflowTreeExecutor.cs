@@ -142,7 +142,7 @@ internal class WorkflowTreeExecutor<TState, TEvent, TTreeProvider> : IWorkflowTr
             return eventNodeInst;
         }
         
-        List<EventNodeInst<TState, TEvent>> nextExecutors = [..eventNodeInst.NextExecutors, eventNodeInst];
+        List<EventNodeInst<TState, TEvent>> nextExecutors = [eventNodeInst, ..eventNodeInst.NextExecutors];
 
         // TODO maybe single is not required here and should be FirstOrDefault as it is guaranteed by tree validation for node to handle the same event as other sibling nodes
         var nextExecutor = nextExecutors.SingleOrDefault(ne => ne.Executor.HandlesEvents.Contains(cursor.CurrentEvent.GetType()));

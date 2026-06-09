@@ -7,20 +7,6 @@ namespace EventSourcingEngine.UnitTests.TreeProviderTests;
 public class WorkflowTreeProviderTests
 {
     [Fact]
-    public void TreeProviderConstructor_ShouldThrowEventSourcingEngineTreeValidationException_WhenTreeDoesNotImplementINodeExecutor()
-    {
-        // Arrange
-        var serviceProviderMock = new Mock<IServiceProvider>();
-        serviceProviderMock.Setup(sp => sp.GetService(It.IsAny<Type>())).Returns(new object());
-
-        // Act & Assert
-        var exception = Assert.Throws<WorkflowEngineTreeValidationException>(() =>
-            new InvalidExecutorWorkflowTreeProvider());
-
-        Assert.Equal("Executor must implement INodeExecutor", exception.Message);
-    }
-
-    [Fact]
     public void TreeProviderConstructor_ShouldThrowEventSourcingEngineTreeValidationException_WhenNodesOnSameLevelHandleSameEvent()
     {
         // Act & Assert
@@ -37,7 +23,7 @@ public class WorkflowTreeProviderTests
         var exception = Assert.Throws<WorkflowEngineTreeValidationException>(() =>
             new NotValidProducedEventWorkflowTreeProvider());
         
-        Assert.Equal($"Node with an executor {nameof(Node6)} handles event {typeof(TreeEvent.WeirdEvent)} that is not produced by parent node with an executor {nameof(Node4)} or by itself", exception.Message);
+        Assert.Equal($"Node with an executor {typeof(Node6)} handles event {typeof(TreeEvent.WeirdEvent)} that is not produced by parent node with an executor {typeof(Node4)} or by itself", exception.Message);
     }
 
     [Fact]
@@ -76,6 +62,14 @@ public class WorkflowTreeProviderTests
     {
         var exception = Assert.Throws<WorkflowEngineTreeValidationException>(() => new NotInitialEventHandledWorkflowTreeProvider());
         
-        Assert.Equal($"Initial Node must handle event {nameof(TreeEvent.Event1)}", exception.Message);
+        Assert.Equal($"Initial Node must handle event {typeof(TreeEvent.Event1)}", exception.Message);
+    }
+    
+    [Fact]
+    public void TreeProviderConstructor_ShouldThrowWorkflowEngineTreeValidationException_WhenChildNodeHandlesSameEventAsParentNode()
+    {
+        var exception = Assert.Throws<WorkflowEngineTreeValidationException>(() => new SameEventsAsParentNodeWorkflowTreeProvider());
+        
+        Assert.Equal($"Child node handles same event ({typeof(TreeEvent.Event3)}) as parent node", exception.Message);
     }
 }

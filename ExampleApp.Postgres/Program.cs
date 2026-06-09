@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.RegisterWorkflowTree<TestState, FirstTreeEvent, FirstWorkflowTreeProvider>();
+builder.Services.RegisterWorkflowTree<TestState, FirstTreeEvent,  FirstWorkflowTreeProvider>();
 builder.Services.AddScoped<EventExecutorNode>();
 builder.Services.AddScoped<ResultSaverNode>();
 
@@ -28,6 +28,12 @@ builder.Services.AddDbContext<AppDbContext>(b =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -35,6 +41,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.MapGet("/health", () => "Healthy");
 
 app.MapPost("/process", async (AppDbContext dbContext, ILoggerFactory loggerFactory) =>
     {
